@@ -7,7 +7,7 @@ from cocotb.triggers import Timer
 # to the filepath of the .log
 # file you are working with
 CHAIN_LENGTH = -1
-FILE_NAME    = ""
+FILE_NAME    = "adder/adder.log"
 
 
 
@@ -125,6 +125,10 @@ async def step_clock(dut):
     ######################
     # TODO: YOUR CODE HERE 
     ######################
+    dut.clk.value = 1
+    await Timer(10, units='ns')
+    dut.clk.value = 0
+    await Timer(10, units='ns')
 
     pass
     
@@ -141,6 +145,11 @@ async def input_chain_single(dut, bit, ff_index):
     ######################
     # TODO: YOUR CODE HERE 
     ######################
+    dut.scan_in = bit
+    dut.scan_en.value = 1
+    for i in range(ff_index+1):
+        await step_clock(dut)
+    dut.scan_en.value = 0
 
     pass
     
@@ -158,6 +167,13 @@ async def input_chain(dut, bit_list, ff_index):
     ######################
     # TODO: YOUR CODE HERE 
     ######################
+    dut.scan_en.value = 1
+    for i in range(len(bit_list), 0):
+        dut.scan_in = bit_list[i]
+        await step_clock(dut)
+    for i in range(ff_index):
+        await step_clock(dut)
+    dut.scan_en.value = 0
 
     pass
 
@@ -171,6 +187,10 @@ async def output_chain_single(dut, ff_index):
     ######################
     # TODO: YOUR CODE HERE 
     ######################
+    dut.scan_en.value = 1
+    for i in range(CHAIN_LENGTH - ff_index):
+        await step_clock(dut)
+    dut.scan_en.value = 0
 
     pass       
 
@@ -186,6 +206,10 @@ async def output_chain(dut, ff_index, output_length):
     ######################
     # TODO: YOUR CODE HERE 
     ######################
+    dut.scan_en.value = 1
+    for i in range(ff_index, output_length):
+        await step_clock(dut)
+    dut.scan_en.value = 0
 
     pass       
 
@@ -199,11 +223,14 @@ async def test(dut):
     global CHAIN_LENGTH
     global FILE_NAME        # Make sure to edit this guy
                             # at the top of the file
-
     # Setup the scan chain object
     chain = setup_chain(FILE_NAME)
+    CHAIN_LENGTH = chain.chain_length
+    await input_chain(dut, [1,1,1,1], chain.registers["a_reg"].index_list[-1])
+    await step_clock(dut)
+    print(dut.x_out.value)
+    
 
     ######################
     # TODO: YOUR CODE HERE 
     ######################
-
