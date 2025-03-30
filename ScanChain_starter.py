@@ -226,7 +226,7 @@ async def test(dut):
     # Setup the scan chain object
     chain = setup_chain(FILE_NAME)
     CHAIN_LENGTH = chain.chain_length
-    await input_chain(dut, [1,1,1,1], chain.registers["a_reg"].index_list[-1])
+    await input_chain(dut, [1,1,1,1], chain.registers["a_reg"].index_list[0])
     await step_clock(dut)
     print(dut.x_out.value)
     
